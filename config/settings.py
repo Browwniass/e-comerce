@@ -36,14 +36,17 @@ INSTALLED_APPS += [
     'django_filters',
     'djoser',
     'corsheaders',
-    'social_django'
+    'social_django',
+   #'allauth',
+    #'allauth.account',
 ]
 
 # apps
 INSTALLED_APPS += [
     'api',
     'common',
-    "users",
+    'users',
+    'products',
 ]
 
 MIDDLEWARE = [
