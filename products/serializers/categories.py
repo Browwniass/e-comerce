@@ -4,5 +4,5 @@ from products.models.categories import Category
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ('name',)
-        read_only_fields = ('id',)
+        fields = ('name', 'slug')
+        read_only_fields = ('id', 'slug')

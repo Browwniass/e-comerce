@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from products.models import Category
 from products.models.products import Product
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -17,3 +18,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('__all__')
         read_only_fields = ('id', 'created_at', 'updated_at', 'slug')
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('__all__')
+        read_only_fields = ('id', 'category', 'created_at', 'updated_at', 'slug')

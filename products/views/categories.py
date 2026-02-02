@@ -7,3 +7,4 @@ class CategoriesView(LCRUDViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [AdminOrReadOnly]
+    lookup_field = "slug"
