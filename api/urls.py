@@ -1,6 +1,7 @@
 from django.urls import path, include
 from users.urls import urlpatterns as users_urls
 from products.urls import urlpatterns as products_urls
+from carts.urls import urlpatterns as carts_urls
 
 app_name = 'api'
 
@@ -12,3 +13,4 @@ urlpatterns = [
 
 urlpatterns += users_urls
 urlpatterns += products_urls
+urlpatterns += carts_urls
