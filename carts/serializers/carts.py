@@ -28,3 +28,16 @@ class CartsItemSerializer(serializers.ModelSerializer):
             'quantity',
         )
         read_only_fields = ('cart',)
+
+class CartsItemDetailSerializer(serializers.ModelSerializer):
+    product = ProductShortSerializer(read_only=True)
+
+    class Meta:
+        model = CartItem
+        fields = (
+            'id',
+            'cart',
+            'product',
+            'quantity',
+        )
+        read_only_fields = ('cart', 'product')
