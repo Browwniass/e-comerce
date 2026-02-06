@@ -11,12 +11,11 @@ class OrderCreateView(APIView):
 
     def post(self, request):
         cart = request.user.cart
-        items_qr = list(cart.items.select_related('product'))
+        items_qr = list(cart.items.select_related("product"))
 
         if not items_qr:
             return Response(
-                {'detail': 'Cart is empty'},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Cart is empty"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         with transaction.atomic():
@@ -24,7 +23,7 @@ class OrderCreateView(APIView):
             for item in items_qr:
                 if item.quantity > item.product.stock:
                     return Response(
-                        {'detail': 'Item quantity exceeds stock quantity'},
+                        {"detail": "Item quantity exceeds stock quantity"},
                     )
                 total += item.quantity * item.product.price
 
@@ -50,9 +49,9 @@ class OrderCreateView(APIView):
 
         return Response(
             {
-                'order_id': order.id,
-                'status': order.status,
-                'total_amount': order.total_amount,
+                "order_id": order.id,
+                "status": order.status,
+                "total_amount": order.total_amount,
             },
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
