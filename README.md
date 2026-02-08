@@ -54,4 +54,4 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET="social_auth_google_secret"
 - Картинки у продуктов
 - Тесты
 - Докеризация
-- кешировать с Redis
+- Кешировать с Redis
