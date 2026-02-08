@@ -1,6 +1,7 @@
+from common.views.mixins import LCRUDViewSet
 from carts.models import Cart, CartItem
 from carts.serializers.carts import CartsItemSerializer, CartsItemDetailSerializer
-from common.views.mixins import LCRDViewSet, LCRUDViewSet
+
 
 
 class CartsView(LCRUDViewSet):

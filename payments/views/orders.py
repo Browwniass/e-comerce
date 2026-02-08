@@ -3,29 +3,37 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from payments.models.orders import OrderItem, Order
+from payments.services import utils
 
 
 class OrderCreateView(APIView):
+    """
+    Make Order based on user''s cart
+    """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # Get user's cart and then all of his items
         cart = request.user.cart
         items_qr = list(cart.items.select_related("product"))
 
         if not items_qr:
             return Response(
-                {"detail": "Cart is empty"}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Cart is empty"},
+                status=status.HTTP_400_BAD_REQUEST
             )
-
+        # Use transaction so that actions are atomic.
         with transaction.atomic():
-            total = 0
-            for item in items_qr:
-                if item.quantity > item.product.stock:
-                    return Response(
-                        {"detail": "Item quantity exceeds stock quantity"},
-                    )
-                total += item.quantity * item.product.price
+            # calculate total amount and check if there are enough products for sale
+            total = utils.total_price(items_qr)
+            if total == -1:
+                return Response(
+                    {"detail": "Item quantity exceeds stock quantity"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             order = Order.objects.create(
                 user=request.user,
@@ -33,6 +41,7 @@ class OrderCreateView(APIView):
             )
 
             cart_items = []
+
             for item in items_qr:
                 cart_items.append(
                     OrderItem(
@@ -44,7 +53,6 @@ class OrderCreateView(APIView):
                 )
 
             OrderItem.objects.bulk_create(cart_items)
-
             cart.items.all().delete()
 
         return Response(

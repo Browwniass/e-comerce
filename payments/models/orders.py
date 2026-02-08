@@ -16,11 +16,18 @@ class Order(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
+
     def __str__(self):
         return f"order[{self.id}]"
 
 
 class OrderItem(models.Model):
+    """
+    Model for Order Snapshots
+    """
     order = models.ForeignKey(
         "payments.Order", on_delete=models.CASCADE, related_name="order_items"
     )
@@ -29,5 +36,9 @@ class OrderItem(models.Model):
     product_price = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.PositiveIntegerField()
 
+    class Meta:
+        verbose_name = "Снимок заказа"
+        verbose_name_plural = "Снимки заказов"
+
     def __str__(self):
-        return f"{self.product_id} [{self.quantity}]"
+        return f"orderitem [{self.product_id} x {self.quantity}]"

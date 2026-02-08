@@ -15,9 +15,13 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=210, blank=True)
 
+    class Meta:
+        verbose_name = "Продукт"
+        verbose_name_plural = "Продукты"
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(Product, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} - id{self.pk}"
+        return f"{self.name}[{self.pk}]"

@@ -1,8 +1,13 @@
 import uuid
+
 from yookassa import Payment
 
 
 def create_payment(*, payment, user):
+    """
+    Stub provider for local development and tests.
+    """
+
     idempotence_key = str(uuid.uuid4())
     yok_payment = Payment.create(
         {

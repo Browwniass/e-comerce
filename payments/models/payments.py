@@ -2,12 +2,16 @@ from django.db import models
 
 
 class Payment(models.Model):
+    """
+    Model for saving payment transactions
+    """
     PAYMENT_STATUS = (
         ("pending", "Pending"),
         ("paid", "Paid"),
         ("failed", "Failed"),
         ("refunded", "Refunded"),
     )
+
     order = models.ForeignKey(
         "payments.Order", on_delete=models.CASCADE, related_name="payments"
     )
@@ -21,5 +25,9 @@ class Payment(models.Model):
     external_payment_id = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+
     def __str__(self):
-        return f"payment: {self.id}"
+        return f"payment[{self.id}]"

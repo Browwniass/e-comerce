@@ -2,12 +2,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.exceptions import NotFound
-from rest_framework.filters import SearchFilter, OrderingFilter
-from products.filters import ProductsFilter
+from rest_framework.filters import OrderingFilter
+
+from common.permissions import AdminOrReadOnly
 from common.views.mixins import LCRUDViewSet
+from products.filters import ProductsFilter
 from products.models.products import Product
 from products.models.categories import Category
-from common.permissions import AdminOrReadOnly
 from products.serializers.products import (
     ProductListSerializer,
     ProductDetailSerializer,
