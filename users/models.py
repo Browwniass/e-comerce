@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
-
 
 class User(AbstractUser):
     email = models.EmailField("Почта", unique=True)
@@ -15,4 +13,4 @@ class User(AbstractUser):
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
-        return f"{self.username} ({self.email})"
+        return f"{self.username}[{self.id}] x {self.email}"

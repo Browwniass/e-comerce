@@ -1,7 +1,6 @@
 from users.models import User
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError
-from django.contrib.auth.password_validation import validate_password
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -20,7 +19,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         email = value.lower()
         if User.objects.filter(email=email).exists():
-            raise ParseError("Пользователь с такой почтой уже зарегистрирован.")
+            raise ParseError("User with this email already exists")
         return email
 
     def create(self, validated_data):

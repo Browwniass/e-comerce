@@ -1,11 +1,11 @@
-from rest_framework import status, permissions, generics
+from rest_framework import status, permissions
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from social_django.utils import load_strategy, load_backend
-from social_core.exceptions import AuthException
+
 from users.serializers.users import LogoutSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from users.serializers.api.login import GoogleLoginSerializer
+from users.views.auth import google_authenticate
 
 
 class LogoutView(APIView):
@@ -15,41 +15,28 @@ class LogoutView(APIView):
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GoogleLoginView(APIView):
+    """
+    View for checking user authentication from google account without front
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
-        access_token = request.data.get("access_token")
-
-        if not access_token:
-            return Response(
-                {"error": "access_token is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        strategy = load_strategy(request)
-        backend = load_backend(
-            strategy=strategy, name="google-oauth2", redirect_uri=None  # ВАЖНО
-        )
+        serializer = GoogleLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         try:
-            user = backend.do_auth(access_token=access_token)
-        except AuthException as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not user:
-            return Response(
-                {"error": "Authentication failed"}, status=status.HTTP_400_BAD_REQUEST
+            tokens = google_authenticate(
+                request=request,
+                access_token=serializer.validated_data['access_token'],
             )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST)
 
-        refresh = RefreshToken.for_user(user)
-
-        return Response(
-            {
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            }
-        )
+        return Response(tokens, status=status.HTTP_200_OK)

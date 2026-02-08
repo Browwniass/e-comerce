@@ -1,16 +1,21 @@
 import json
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from payments.models.orders import Order
 from payments.models.payments import Payment
 from payments.serializers.payments import PaymentCreateSerializer
-from payments.services import youkassa
+from payments.services import abspayment
 
 
 class PaymentCreateView(APIView):
-
+    """
+    Create payments and redirecting user to external payment provider site
+    """
     def post(self, request):
+        # Get order instance
         serializer = PaymentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -24,15 +29,13 @@ class PaymentCreateView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # make payment
         payment = Payment.objects.create(
-            order=order, amount=order.total_amount, provider="sbp"
+            order=order, amount=order.total_amount, provider="abs"
         )
 
-        payment_data = youkassa.create_payment(
-            payment=payment,
-            user=request.user,
-        )
-
+        payment_data = abspayment.create_payment(payment=payment)
+        # saving data about the external link to the payment instance
         payment.external_payment_id = payment_data["external_id"]
         payment.save(update_fields=["external_payment_id"])
 
@@ -46,6 +49,9 @@ class PaymentCreateView(APIView):
 
 
 class PaymentWebhookView(APIView):
+    """
+    Catch payment API response
+    """
 
     def post(self, request):
         data = json.loads(request.body)

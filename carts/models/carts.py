@@ -6,6 +6,10 @@ class Cart(models.Model):
         "users.User", on_delete=models.CASCADE, related_name="cart"
     )
 
+    class Meta:
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзины"
+
     def __str__(self):
         return self.user.username
 
@@ -18,7 +22,9 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField()
 
     class Meta:
+        verbose_name = "Продукт_корзины"
+        verbose_name_plural = "Продукты_корзины"
         unique_together = ("cart", "product")
 
     def __str__(self):
-        return f"{self.cart} [{self.product}]"
+        return f"{self.cart} x {self.product}"
