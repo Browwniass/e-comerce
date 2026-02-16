@@ -162,6 +162,7 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.MultiPartParser",
         "rest_framework.parsers.FileUploadParser",
     ],
+    "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardResultsSetPagination"
     #'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     #'DEFAULT_PAGINATION_CLASS': 'common.pagination.BasePagination',
 }
