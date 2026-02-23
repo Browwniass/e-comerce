@@ -8,7 +8,7 @@ class Payment(models.Model):
     PAYMENT_STATUS = (
         ("pending", "Pending"),
         ("paid", "Paid"),
-        ("failed", "Failed"),
+        ("canceled", "Canceled"),
         ("refunded", "Refunded"),
     )
 

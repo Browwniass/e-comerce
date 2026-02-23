@@ -1,5 +1,6 @@
 import json
 
+from requests import RequestException
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,15 +8,15 @@ from rest_framework.response import Response
 from payments.models.orders import Order
 from payments.models.payments import Payment
 from payments.serializers.payments import PaymentCreateSerializer
-from payments.services import abspayment
+from payments.services.mockpayment import PaymentService
 
 
 class PaymentCreateView(APIView):
     """
-    Create payments and redirecting user to external payment provider site
+    Create a payment and return a URL for external provider to pay for an order
     """
+
     def post(self, request):
-        # Get order instance
         serializer = PaymentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -26,44 +27,25 @@ class PaymentCreateView(APIView):
         except Order.DoesNotExist:
             return Response(
                 {"detail": "Order does not exist or already paid"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_404_NOT_FOUND,
             )
 
-        # make payment
-        payment = Payment.objects.create(
-            order=order, amount=order.total_amount, provider="abs"
-        )
-
-        payment_data = abspayment.create_payment(payment=payment)
-        # saving data about the external link to the payment instance
-        payment.external_payment_id = payment_data["external_id"]
-        payment.save(update_fields=["external_payment_id"])
+        try:
+            payment_data = PaymentService.create_payment(order=order)
+        except RequestException as err:
+            return Response(
+                {"detail": str(err)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except ValueError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
         return Response(
-            {
-                "payment_url": payment_data.get("payment_url"),
-                "qr_code": payment_data.get("qr_code"),
-            },
+            {"confirmation_url": payment_data.get("confirmation_url")},
             status=status.HTTP_201_CREATED,
         )
 
 
-class PaymentWebhookView(APIView):
-    """
-    Catch payment API response
-    """
-
-    def post(self, request):
-        data = json.loads(request.body)
-
-        if data["event"] == "payment.succeeded":
-            payment = Payment.objects.get(external_payment_id=data["payment_id"])
-
-            payment.status = "paid"
-            payment.save(update_fields=["status"])
-
-            order = payment.order
-            order.status = "paid"
-            order.save(update_fields=["status"])
-
-        return Response({"detail": "Payment succeeded"}, status=status.HTTP_200_OK)

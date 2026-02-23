@@ -1,5 +1,6 @@
 def total_price(items):
-    total = 0  #
+    """Calculate the total price of a list of items"""
+    total = 0
 
     for item in items:
         if item.quantity > item.product.stock:

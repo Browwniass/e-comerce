@@ -10,31 +10,36 @@ from payments.services import utils
 
 class OrderCreateView(APIView):
     """
-    Make Order based on user''s cart
+    Create Order based on user's cart
     """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Get user's cart and then all of his items
         cart = request.user.cart
         items_qr = list(cart.items.select_related("product"))
-
+        # Check if user even have smth to buy
         if not items_qr:
             return Response(
                 {"detail": "Cart is empty"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        # Use transaction so that actions are atomic.
+
         with transaction.atomic():
-            # calculate total amount and check if there are enough products for sale
+            # Calculate total amount and validate product stock availability
             total = utils.total_price(items_qr)
             if total == -1:
                 return Response(
-                    {"detail": "Item quantity exceeds stock quantity"},
+                    {"detail": "Not enough stock"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            # Ensure the user has only one active unpaid order
+            Order.objects.filter(
+                user=request.user,
+                status="created"
+            ).update(status="canceled")
 
+            # Create new order
             order = Order.objects.create(
                 user=request.user,
                 total_amount=total,
@@ -42,6 +47,7 @@ class OrderCreateView(APIView):
 
             cart_items = []
 
+            # Processing an order from the items in the cart
             for item in items_qr:
                 cart_items.append(
                     OrderItem(
@@ -53,6 +59,7 @@ class OrderCreateView(APIView):
                 )
 
             OrderItem.objects.bulk_create(cart_items)
+
             cart.items.all().delete()
 
         return Response(
