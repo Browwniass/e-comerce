@@ -13,6 +13,8 @@ SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.str("ALLOWED_HOSTS", default="").split(" ")
 
+PAYMENT_WEBHOOK_SECRET_KEY = env.str("PAYMENT_WEBHOOK_SECRET_KEY")
+
 
 # Application definition
 
@@ -37,12 +39,21 @@ INSTALLED_APPS += [
     "djoser",
     "corsheaders",
     "social_django",
+    "drf_spectacular",
     #'allauth',
     #'allauth.account',
 ]
 
 # apps
-INSTALLED_APPS += ["api", "common", "users", "products", "carts", "payments"]
+INSTALLED_APPS += [
+    "api",
+    "common",
+    "users",
+    "products",
+    "carts",
+    "payments",
+    "mock_provider"
+]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -89,7 +100,7 @@ DATABASES = {
         "USER": env.str("PG_USER", "Brownie"),
         "PASSWORD": env.str("PG_PASSWORD", "admin"),
         "HOST": env.str(
-            "DB_HOST", "localhost"
+            "DB_HOST", "db"
         ),  # Replace with your PostgreSQL server's address if necessary
         "PORT": env.str(
             "DB_PORT", "5432"
@@ -162,8 +173,8 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.MultiPartParser",
         "rest_framework.parsers.FileUploadParser",
     ],
-    "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardResultsSetPagination"
-    #'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_PAGINATION_CLASS": "common.pagination.StandardResultsSetPagination",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     #'DEFAULT_PAGINATION_CLASS': 'common.pagination.BasePagination',
 }
 
@@ -233,4 +244,32 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=1),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=7),
+}
+
+#####################
+# DRF SPECTACULAR
+#####################
+SPECTACULAR_SETTINGS = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'TITLE': 'e-comerce',
+    'DESCRIPTION': 'e-comerce',
+    'VERSION': '1.0.0',
+
+    'SERVE_PERMISSIONS': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+
+    'SERVE_AUTHENTICATION': [
+        'rest_framework.authentication.BasicAuthentication'
+    ],
+
+    'SWAGGER_UI_SETTINGS': {
+        'DeepLinking': True,
+        'DisplayOperationId': True,
+    },
+
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SORT_OPERATIONS': False
+
 }

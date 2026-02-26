@@ -1,0 +1,36 @@
+services:
+ db:
+   image: postgres:17
+   environment:
+     POSTGRES_DB: ${PG_DATABASE}
+     POSTGRES_USER: ${PG_USER}
+     POSTGRES_PASSWORD: ${PG_PASSWORD}
+   ports:
+     - "5432:5432"
+   volumes:
+     - postgres_data:/var/lib/postgresql/data
+   env_file:
+     - .env
+ 
+ django-web:
+   build: .
+   container_name: django-docker
+   ports:
+     - "8000:8000"
+   depends_on:
+     - db
+   environment:
+     DJANGO_SECRET_KEY: ${SECRET_KEY}
+     DEBUG: ${DEBUG}
+     DJANGO_ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+     DATABASE_ENGINE: "django.db.backends.postgresql_psycopg2"
+     DATABASE_NAME: ${PG_DATABASE}
+     DATABASE_USERNAME: ${PG_USER}
+ 
+     DATABASE_PASSWORD: ${PG_PASSWORD}
+     DATABASE_HOST: ${DB_HOST}
+     DATABASE_PORT: ${DB_PORT}
+   env_file:
+     - .env
+volumes:
+   postgres_data:
