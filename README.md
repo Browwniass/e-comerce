@@ -10,6 +10,8 @@ API e-comerce, созданный с Django и DRF
 - Оформление заказов и формирование (атомарной операцией) "снимка заказа" для сохранения информации в изначальном виде
 - Оплата заказа с интеграцией стороннего платежного провайдера (юкасса; пока подключенная заглушка)
 - Пагинация
+- Автодокументация swagger
+- Обернут в Docker-контейнер
 ### Использование
 - Регистрация, Аутентификация через с сайт ```POST ``` ```/api/auth/jwt/create/``` ```/api/auth/login/``` ```/api/auth/logout/```
 - Регистрация и аутентификация через Google ```POST ``` ```/api/oauth/```
@@ -31,15 +33,15 @@ API e-comerce, созданный с Django и DRF
 ```
 git clone https://github.com/your-username/ecommerce-api.git
 ```
-Установка виртуального окружения и зависимостей
+Достаточно будет запустить у себя Docker-контейнер и провести миграции в бд, необходимые зависимости он сам установит
 ```
-python -m venv venv
-source venv/bin/activate  # Linux / macOS
-venv/Scripts/activate.ps1     # Windows
+docker build -t django-docker .    
+docker compose run django-web python manage.py migrate  
+docker compose run django-web python manage.py makemigraions 
 
-pip install -r requirements.txt
+docker compose up --build         
 ```
-Настройка почты отправки, OAuth, подлкючение к БД через файл .env. В нем заменить на свои данные:
+Далее нужно будет создать файл .env в корне проекта (там же где и app и докерфайлы). и по образцу example.env заполнить файл под себя.
 ```
 ...
 EMAIL_HOST_USER=corporate_email
@@ -50,8 +52,6 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET="social_auth_google_secret"
 ```
 ### Что будет делать
 - Возвращение денег
-- Автодокументация swagger
 - Картинки у продуктов
 - Тесты
-- Докеризация
 - Кешировать с Redis
