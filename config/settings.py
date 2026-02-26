@@ -100,7 +100,7 @@ DATABASES = {
         "USER": env.str("PG_USER", "Brownie"),
         "PASSWORD": env.str("PG_PASSWORD", "admin"),
         "HOST": env.str(
-            "DB_HOST", "localhost"
+            "DB_HOST", "db"
         ),  # Replace with your PostgreSQL server's address if necessary
         "PORT": env.str(
             "DB_PORT", "5432"
